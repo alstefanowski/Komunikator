@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "limits.h": "c",
-        "signal.h": "c"
+        "signal.h": "c",
+        "syslog.h": "c"
     }
 }
