@@ -12,13 +12,13 @@
 #include <syslog.h>
 #include <errno.h>
 
-#define PUBLIC      "/home/kali/Desktop/Komunikator/M_FIFO"
+#define PUBLIC      "/tmp/M_FIFO"
 #define CLOSE_MESSAGE "Zamkniecie serwera"
 
 
 #define WARNING "warning"
 #define wiadomosc "Wiadomosc: "
-#define LOGOUT "Wylogowano|"
+#define LOGOUT "Wylogowano"
 
 typedef struct user {
     char username[100];

@@ -78,7 +78,7 @@ int client_child(User user)
 {
     if (mkfifo(user.fifo_path, 0666) == -1)
     {
-        send_to_log("Problem z utworzeniem fifo");
+        send_to_log("Problem z utworzeniem fifo klienta");
         perror("user_mkfifo");
         exit(1);
     }
@@ -102,7 +102,8 @@ int client_parent(User user)
 {
     signal(SIGQUIT, &signal_handler);
     pid_t pid = getpid();
-    sprintf(user.fifo_path, "/home/kali/Desktop/Komunikator/%d", pid);
+    sprintf(user.fifo_path, "/tmp/%d", pid); ///home/kali/Desktop/Komunikator/
+    chmod(user.fifo_path, S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP);
 
     char output[4096];
     memset(output, 0x0, sizeof(output));
@@ -198,7 +199,6 @@ int server()
     if ((fd_fifo = open(PUBLIC, O_RDWR)) == -1)
     {
         send_to_log("Problem z otwarciem potoku serwera");
-        perror("fd PUBLIC");
         return -1;
     }
 
@@ -212,8 +212,8 @@ int server()
 
         if ((bytes_read = read(fd_fifo, bufor, sizeof(bufor))) == -1)
         {
-            perror("bytes_read_server");
-            exit(1);
+            send_to_log("Problem z czytaniem z fifo_serwera");
+            return -1;
         }
 
         if (bytes_read > 0)
@@ -277,14 +277,15 @@ int server()
                         int fd;
                         if ((fd = open(users[i].fifo_path, O_WRONLY)) == -1)
                         {
-                            perror("fd_open");
-                            exit(1);
+                            send_to_log("Problem z otwarciem potoku fifo klienta");
+                            return -1;
                         }
 
                         if ((write(fd, output, sizeof(output))) == -1)
                         {
-                            perror("write");
-                            exit(1);
+
+                            send_to_log("Problem z pisaniem informacji do potoku fifo klienta");
+                            return -1;
                         }
                     }
                 }
@@ -297,12 +298,14 @@ int server()
                             int fd;
                             if ((fd = open(users[i].fifo_path, O_WRONLY)) == -1)
                             {
-                                exit(1);
+                                send_to_log("Problem z otwarciem potoku fifo klienta");
+                                return -1;
                             }
 
                             if ((write(fd, output, sizeof(output))) == -1)
                             {
-                                exit(1);
+                                 send_to_log("Problem z pisaniem informacji do potoku fifo klienta");
+                                return -1;
                             }
                             break;
                         }
@@ -312,7 +315,7 @@ int server()
                         break;
                     }
                 }
-                syslog(LOG_INFO, "Pomyslnie wyslano wiadomosc od %s o tresci %s", sender, message);
+                syslog(LOG_INFO, "Pomyslnie wyslano wiadomosc od %s do %s o tresci %s", sender, recipient, message);
             }
         }
     }
